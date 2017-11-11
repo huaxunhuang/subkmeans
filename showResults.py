@@ -8,102 +8,103 @@ import importlib
 delta = 1e-6
 
 methods = ["kmeans","PCA_kmeans","ICA_kmeans"]
-clusters = dict()
-labels = dict()
-features = dict()#sample number, dimension, k
-dataset = dict()
 
-def getAverageResult(data,method,avgSum,k):
-    data = preprocessing.scale(data)
-    return method(data,k)[0]
 
-for method in methods:
-    m_module = importlib.import_module(method)
-    print()
-    print("METHOD: "+method)
+
+def dataCollection():
+    #data collection
+    features = dict()
+    labels = dict()
+    parameters = dict()  # sample number, dimension, k
     k=3
     #wine. paper use 9 dimensions, while there are 13 dimensions.
-    dataset["wine"] = pd.read_csv("data/wine.data", header=None)
-    x = dataset["wine"].loc[:,1:13]
-    clusters["wine"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["wine"] = dataset["wine"].loc[:,0]
-    features["wine"] = [dataset["wine"].shape[0],dataset["wine"].shape[1]-1,k]
+    dataset = pd.read_csv("data/wine.data", header=None)
+    features["wine"] = dataset.loc[:,1:13]
+    labels["wine"] = dataset.loc[:,0]
+    parameters["wine"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #pendigit: paper use training data.
     k=10
-    dataset["pendigits"] = pd.read_csv("data/pendigits.tra", header=None, sep=",")
-    x = dataset["pendigits"].loc[:,:dataset["pendigits"].shape[1]-2]
-    clusters["pendigits"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["pendigits"] = dataset["pendigits"].loc[:,dataset["pendigits"].shape[1]-1]
-    features["pendigits"] = [dataset["pendigits"].shape[0],dataset["pendigits"].shape[1]-1,k]
+    dataset = pd.read_csv("data/pendigits.tra", header=None, sep=",")
+    features["pendigits"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["pendigits"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["pendigits"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #Ecoli
     k=5
-    dataset["ecoli"] = pd.read_csv("data/ecoli.data", header=None,delim_whitespace=True)
-    x = dataset["ecoli"].loc[:,1:dataset["ecoli"].shape[1]-2]
-    clusters["ecoli"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["ecoli"] = dataset["ecoli"].loc[:,dataset["ecoli"].shape[1]-1]
-    features["ecoli"] = [dataset["ecoli"].shape[0],dataset["ecoli"].shape[1]-2,k]
-
+    dataset = pd.read_csv("data/ecoli.data", header=None,delim_whitespace=True)
+    features["ecoli"] = dataset.loc[:,1:dataset.shape[1]-2]
+    labels["ecoli"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["ecoli"] = [dataset.shape[0],dataset.shape[1]-2,k]
 
     #Seeds
     k=3
-    dataset["seeds"] = pd.read_csv("data/seeds_dataset.txt", header=None,delim_whitespace=True)
-    x = dataset["seeds"].loc[:,:dataset["seeds"].shape[1]-2]
-    clusters["seeds"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["seeds"] = dataset["seeds"].loc[:,dataset["seeds"].shape[1]-1]
-    features["seeds"] = [dataset["seeds"].shape[0],dataset["seeds"].shape[1]-1,k]
-
+    dataset = pd.read_csv("data/seeds_dataset.txt", header=None,delim_whitespace=True)
+    features["seeds"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["seeds"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["seeds"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #Soybean
     k=4
-    dataset["soybean"] = pd.read_csv("data/soybean-small.data", header=None)
-    x = dataset["soybean"].loc[:,:dataset["soybean"].shape[1]-2]
-    clusters["soybean"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["soybean"] = dataset["soybean"].loc[:,dataset["soybean"].shape[1]-1]
-    features["soybean"] = [dataset["soybean"].shape[0],dataset["soybean"].shape[1]-1,k]
-
+    dataset = pd.read_csv("data/soybean-small.data", header=None)
+    features["soybean"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["soybean"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["soybean"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #Symbol
     k=6
-    dataset["symbol"] = pd.read_csv("data/Symbols_TEST.arff", header=None)
-    x = dataset["symbol"].loc[:,:dataset["symbol"].shape[1]-2]
-    clusters["symbol"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["symbol"] = dataset["symbol"].loc[:,dataset["symbol"].shape[1]-1]
-    features["symbol"] = [dataset["symbol"].shape[0],dataset["symbol"].shape[1]-1,k]
-
+    dataset = pd.read_csv("data/Symbols_TEST.arff", header=None)
+    features["symbol"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["symbol"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["symbol"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #OliveOil
     k=4
-    dataset["oliveoil"] = pd.read_csv("data/OliveOil.arff", header=None)
-    x = dataset["oliveoil"].loc[:,:dataset["oliveoil"].shape[1]-2]
-    clusters["oliveoil"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["oliveoil"] = dataset["oliveoil"].loc[:,dataset["oliveoil"].shape[1]-1]
-    features["oliveoil"] = [dataset["oliveoil"].shape[0],dataset["oliveoil"].shape[1]-1,k]
-
+    dataset = pd.read_csv("data/OliveOil.arff", header=None)
+    features["oliveoil"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["oliveoil"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["oliveoil"] = [dataset.shape[0],dataset.shape[1]-1,k]
 
     #Plane
     k=7
-    dataset["plane"] = pd.read_csv("data/Plane.arff", header=None)
-    x = dataset["plane"].loc[:,:dataset["plane"].shape[1]-2]
-    clusters["plane"] = getAverageResult(x,m_module.get_labels,avgSum=40,k=k)
-    labels["plane"] = dataset["plane"].loc[:,dataset["plane"].shape[1]-1]
-    features["plane"] = [dataset["plane"].shape[0],dataset["plane"].shape[1]-1,k]
+    dataset = pd.read_csv("data/Plane.arff", header=None)
+    features["plane"] = dataset.loc[:,:dataset.shape[1]-2]
+    labels["plane"] = dataset.loc[:,dataset.shape[1]-1]
+    parameters["plane"] = [dataset.shape[0],dataset.shape[1]-1,k]
+
+    return features, labels, parameters
 
 
-    for dataset_name in labels.keys():
-        print(dataset_name+"-NMI:",normalized_mutual_info_score(clusters[dataset_name], labels[dataset_name]))
-        #print(features[dataset_name])
-        if features[dataset_name][1]<10:
-            pass
-            #this is for labels... useless for clusters.
-            #c = clusters[dataset_name].copy()
-            #for i,group in enumerate(np.unique(clusters[dataset_name])):
-            #    c[c==group] = i
-            #print(dataset_name+"-DRAW!")
-            #if dataset_name=="wine":
-            #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
-            #elif dataset_name=="ecoli":
-            #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
-            #else:
-            #    _ = scatter_matrix(dataset[dataset_name].loc[:,:features[dataset_name][1]-1],marker="o",c=clusters[dataset_name])
+def algorithmEval(method, feature, label, k, iter=40):
+    cost, NMI = np.zeros(iter),np.zeros(iter)
+    feature = preprocessing.scale(feature)
+    for i in range(iter):
+        cluster_result, cost[i] = method(feature, k)
+        NMI[i] = normalized_mutual_info_score(cluster_result, label)
+    return np.mean(NMI[np.argsort(cost)][:(1+iter)//2])
+
+
+if __name__ =="__main__":
+    features, labels, parameters = dataCollection()
+    for dataset_name in features.keys():
+        print("DATASET: %s K: %d SAMPLE NUMBER: %d DIMENSION: %d"%(dataset_name, parameters[dataset_name][2],
+                                                                   parameters[dataset_name][0],
+                                                                   parameters[dataset_name][1]))
+    for method_name in methods:
+        m_module = importlib.import_module(method_name)
+        for dataset_name in features.keys():
+            NMI = algorithmEval(m_module.get_labels, features[dataset_name], labels[dataset_name], parameters[dataset_name][2])
+            print("METHOD:%s\tDATASET:%s\t%f"%(method_name, dataset_name, NMI))
+            if parameters[dataset_name][1] < 10:
+                pass
+                # this is for labels... useless for clusters.
+                # c = clusters[dataset_name].copy()
+                # for i,group in enumerate(np.unique(clusters[dataset_name])):
+                #    c[c==group] = i
+                # print(dataset_name+"-DRAW!")
+                # if dataset_name=="wine":
+                #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
+                # elif dataset_name=="ecoli":
+                #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
+                # else:
+                #    _ = scatter_matrix(dataset[dataset_name].loc[:,:features[dataset_name][1]-1],marker="o",c=clusters[dataset_name])
