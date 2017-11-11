@@ -7,7 +7,7 @@ from pandas.plotting import scatter_matrix
 import importlib
 delta = 1e-6
 
-methods = ["kmeans","PCA_kmeans","ICA_kmeans"]
+methods = ["LDA_kmeans","kmeans","PCA_kmeans","ICA_kmeans"]
 
 
 
