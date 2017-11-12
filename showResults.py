@@ -1,110 +1,147 @@
-from sklearn.metrics.cluster import normalized_mutual_info_score
-from sklearn import preprocessing
 import numpy as np
-import matplotlib.pyplot as ppt
-import pandas as pd
-from pandas.plotting import scatter_matrix
-import importlib
-delta = 1e-6
-
-methods = ["LDA_kmeans","kmeans","PCA_kmeans","ICA_kmeans"]
+from numpy import *
+import matplotlib.pyplot as plt
+import random
+import sys
 
 
+def get_labels(dataset, k):
+    labels = []
+    dataset = np.array(dataset)
+    d = dataset.shape[1]
 
-def dataCollection():
-    #data collection
-    features = dict()
-    labels = dict()
-    parameters = dict()  # sample number, dimension, k
-    k=3
-    #wine. paper use 9 dimensions, while there are 13 dimensions.
-    dataset = pd.read_csv("data/wine.data", header=None)
-    features["wine"] = dataset.loc[:,1:13]
-    labels["wine"] = dataset.loc[:,0]
-    parameters["wine"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    # Initialization
+    randomMat = np.random.randn(d, d)
+    q, r = np.linalg.qr(randomMat)
+    V = q
+    m = d / 2
 
-    #pendigit: paper use training data.
-    k=10
-    dataset = pd.read_csv("data/pendigits.tra", header=None, sep=",")
-    features["pendigits"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["pendigits"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["pendigits"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    # Line 7
+    miu_d = zeros([1, d])
+    for arr in dataset:
+        miu_d = miu_d + arr
 
-    #Ecoli
-    k=5
-    dataset = pd.read_csv("data/ecoli.data", header=None,delim_whitespace=True)
-    features["ecoli"] = dataset.loc[:,1:dataset.shape[1]-2]
-    labels["ecoli"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["ecoli"] = [dataset.shape[0],dataset.shape[1]-2,k]
+    miu_d = miu_d * (1.0 / len(dataset))
 
-    #Seeds
-    k=3
-    dataset = pd.read_csv("data/seeds_dataset.txt", header=None,delim_whitespace=True)
-    features["seeds"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["seeds"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["seeds"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    # Line 8
+    s_d = zeros([d, d])
+    for arr in dataset:
+        arr1 = np.array(arr).T
+        temp = miu_d - arr1
+        res = temp.T.dot(temp)
+        s_d = s_d + res
 
-    #Soybean
-    k=4
-    dataset = pd.read_csv("data/soybean-small.data", header=None)
-    features["soybean"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["soybean"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["soybean"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    # Line 9
+    miu_cluster = random.sample(dataset, k);
+    # randomly select k numbers
 
-    #Symbol
-    k=6
-    dataset = pd.read_csv("data/Symbols_TEST.arff", header=None)
-    features["symbol"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["symbol"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["symbol"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    clusters = []
+    for i in range(0, k):
+        clusters.append([])
 
-    #OliveOil
-    k=4
-    dataset = pd.read_csv("data/OliveOil.arff", header=None)
-    features["oliveoil"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["oliveoil"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["oliveoil"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    cost_value = sys.maxint
+    # Line 11
+    while True:
+        # P_c and P_n
+        P_c = eye(m)
+        P_c = np.vstack((P_c, zeros([d - m, m])))
+        P_n = zeros([m, d - m])
+        P_n = np.vstack((P_n, eye(d - m)))
 
-    #Plane
-    k=7
-    dataset = pd.read_csv("data/Plane.arff", header=None)
-    features["plane"] = dataset.loc[:,:dataset.shape[1]-2]
-    labels["plane"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["plane"] = [dataset.shape[0],dataset.shape[1]-1,k]
+        labels = []
+        # assignment step
+        clusters = []
+        for i in range(0, k):
+            clusters.append([])
 
-    return features, labels, parameters
+            # Line 12
+        #         print shape(dataset)
 
+        for arr in dataset:
+            # Line 13
+            j = -1
+            jvalue = sys.maxint
+            for i in range(0, k):
+                tempvalue = P_c.T.dot(V.T).dot(arr)
+                tempvalue = tempvalue - P_c.T.dot(V.T).dot(miu_cluster[i])
+                dist = np.linalg.norm(tempvalue)
+                if dist < jvalue:
+                    jvalue = dist
+                    j = i
 
-def algorithmEval(method, feature, label, k, iter=40):
-    cost, NMI = np.zeros(iter),np.zeros(iter)
-    feature = preprocessing.scale(feature)
-    for i in range(iter):
-        cluster_result, cost[i] = method(feature, k)
-        NMI[i] = normalized_mutual_info_score(cluster_result, label)
-    return np.mean(NMI[np.argsort(cost)][:(1+iter)//2])
+            clusters[j].append(arr)
+            labels.append(j)
 
+        # update step
+        S_clusters = [];
+        for i in range(0, k):
+            S_clusters.append([])
 
-if __name__ =="__main__":
-    features, labels, parameters = dataCollection()
-    for dataset_name in features.keys():
-        print("DATASET: %s K: %d SAMPLE NUMBER: %d DIMENSION: %d"%(dataset_name, parameters[dataset_name][2],
-                                                                   parameters[dataset_name][0],
-                                                                   parameters[dataset_name][1]))
-    for method_name in methods:
-        m_module = importlib.import_module(method_name)
-        for dataset_name in features.keys():
-            NMI = algorithmEval(m_module.get_labels, features[dataset_name], labels[dataset_name], parameters[dataset_name][2])
-            print("METHOD:%s\tDATASET:%s\t%f"%(method_name, dataset_name, NMI))
-            if parameters[dataset_name][1] < 10:
-                pass
-                # this is for labels... useless for clusters.
-                # c = clusters[dataset_name].copy()
-                # for i,group in enumerate(np.unique(clusters[dataset_name])):
-                #    c[c==group] = i
-                # print(dataset_name+"-DRAW!")
-                # if dataset_name=="wine":
-                #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
-                # elif dataset_name=="ecoli":
-                #    _ = scatter_matrix(dataset[dataset_name].loc[:,1:features[dataset_name][1]],marker="o",c=clusters[dataset_name])
-                # else:
-                #    _ = scatter_matrix(dataset[dataset_name].loc[:,:features[dataset_name][1]-1],marker="o",c=clusters[dataset_name])
+        for i in range(0, k):
+            C_i = shape(clusters[i])[0]
+            sum = zeros(shape(clusters[i][0]))
+            for arr in clusters[i]:
+                sum = sum + arr
+            # Line 16
+            miu_cluster[i] = sum * (1.0 / C_i)
+
+            sum = zeros([d, d])
+            # Line 17
+            for arr in clusters[i]:
+                temp1 = np.matrix(arr - miu_cluster[i])
+                sum = sum + temp1.T.dot(temp1)
+
+            S_clusters[i] = sum
+            # print miu_cluster[i]
+
+        # Line 18
+        sum = zeros(shape(S_clusters[0]))
+        for i in range(0, k):
+            sum = sum + S_clusters[i]
+
+        sum = sum - s_d
+        e, V = np.linalg.eig(sum)
+        # order e and V
+        etemp = np.array(sorted(e))
+        e = etemp
+        V = np.array(V)
+        Vtemp = []
+        for num in range(0,shape(etemp)[0]):
+            Vtemp.append(V.T[np.where(e == etemp[num])[0][0]])
+        Vtemp = np.array(Vtemp).T
+        V = Vtemp
+
+        # Line 19
+        tempm = 0
+        for val in e:
+            if val < 0:
+                tempm = tempm + 1
+        m = tempm
+        #         print "m:"+str(m)
+
+        # convergence
+        cost_value_temp = 0.0
+        for i in range(0, k):
+            for arr in clusters[i]:
+                tempval = np.dot(np.dot(P_c.T,V.T),arr)-np.dot(np.dot(P_c.T,V.T),miu_cluster[i])
+                tempval = np.linalg.norm(tempval)
+                tempval = tempval * tempval
+                cost_value_temp = cost_value_temp + tempval
+                tempval = np.dot(np.dot(P_n.T,V.T),arr)-np.dot(np.dot(P_n.T,V.T),miu_d.T)
+                tempval = np.linalg.norm(tempval)
+                tempval = tempval * tempval
+                cost_value_temp = cost_value_temp+tempval
+
+        if cost_value_temp<cost_value:
+            print cost_value
+            cost_value = cost_value_temp
+        else:
+            break
+
+        dimensions = []
+        for j in range(0, shape(e)[0]):
+            if e[j] < 0:
+                dimensions.append(j)
+                dimensions.append(e[j])
+
+    return labels,cost_value
