@@ -16,12 +16,6 @@ def get_labels(dataset, k):
     V = q
     m = d / 2
 
-    # P_c and P_n
-    P_c = eye(m)
-    P_c = np.vstack((P_c, zeros([d - m, m])))
-    P_n = zeros([m, d - m])
-    P_n = np.vstack((P_n, eye(d - m)))
-
     # Line 7
     miu_d = zeros([1, d])
     for arr in dataset:
@@ -48,6 +42,12 @@ def get_labels(dataset, k):
     cost_value = sys.maxint
     # Line 11
     while True:
+        # P_c and P_n
+        P_c = eye(m)
+        P_c = np.vstack((P_c, zeros([d - m, m])))
+        P_n = zeros([m, d - m])
+        P_n = np.vstack((P_n, eye(d - m)))
+
         labels = []
         # assignment step
         clusters = []
@@ -100,8 +100,16 @@ def get_labels(dataset, k):
             sum = sum + S_clusters[i]
 
         sum = sum - s_d
-        e, v = np.linalg.eig(sum)
-        #         print "e:"+str(e)
+        e, V = np.linalg.eig(sum)
+        # order e and V
+        etemp = np.array(sorted(e))
+        e = etemp
+        V = np.array(V)
+        Vtemp = []
+        for num in range(0,shape(etemp)[0]):
+            Vtemp.append(V.T[np.where(e == etemp[num])[0][0]])
+        Vtemp = np.array(Vtemp).T
+        V = Vtemp
 
         # Line 19
         tempm = 0
