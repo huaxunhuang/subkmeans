@@ -1,19 +1,24 @@
 Algorithm: OCULUS
-wine: NMI Sqrt 0.17349878705308178
+wine: NMI Sqrt 0.4590667683696906
 pendigits:NMI Sqrt 0.6518660349845802
-ecoli: NMI Sqrt 0.45999175194657493
+ecoli: NMI Sqrt 0.35907630612149954
 seeds: NMI Sqrt 0.2486827046436046
-soybean:NMI Sqrt 0.7790108171760726
+soybean:NMI Sqrt 0.8278872379847186
 plane:NMI Sqrt 0.6028007495891847
 
-
 Algorithm : 4C
-wine : NMI Sqrt 0.4578075655225884
-pendigits: NMI Sqrt 0.50793080910831
-ecoli: NMI Sqrt 0.21049833540793636
-seeds:NMI Sqrt 0.040705291237855094
-soybean:NMI Sqrt 0.6577982794494213
-Plane:NMI Sqrt 0.6577982794494213
+wine : NMI Sqrt 0.49124046177992625
+pendigits: NMI Sqrt 0.6616351612701623
+ecoli: NMI Sqrt 0.09818404060561718
+seeds:NMI Sqrt 0.028840090287561012
+soybean:NMI Sqrt 0.6012081994383562
+Plane:NMI Sqrt 0.6300105414039849
 
 Algorithm :FOSSCLU
-
+wine : 0.9385105077406839
+pendigits:0.7837761069539678
+ecoli: eigen decomposition did not converge
+seeds: 0.6542633325693802
+soybean: eigen decomposition did not converge
+symbol: eigen decomposition did not converge
+	

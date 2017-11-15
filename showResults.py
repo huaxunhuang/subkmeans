@@ -3,16 +3,26 @@ from sklearn import preprocessing
 import numpy as np
 import matplotlib.pyplot as ppt
 import pandas as pd
+import scipy.io as sio
 from pandas.plotting import scatter_matrix
 import importlib
 delta = 1e-6
 
-methods = ["LDA_kmeans","kmeans","PCA_kmeans","ICA_kmeans"]
+methods = ["LDA_kmeans","PCA_kmeans","ICA_kmeans"]
+def dataMatOutput(features, labels, parameters):
+    for key in features.keys():
+        feature, label = features[key].as_matrix(), labels[key].as_matrix()
+        feature = preprocessing.scale(feature)
+        new_label = np.ones_like(label).astype("double")
+        for idx,value in enumerate(np.unique(label)):
+            new_label[label==value]=idx
+        sio.savemat("data/mat/"+key+".mat",{"feature":feature,"label":new_label})
+
 def dataOutput(features, labels, parameters):
     for key in features.keys():
         f = open("data/standard/"+key,"w")
-        print(key)
         feature, label = features[key].as_matrix(), labels[key].as_matrix()
+        feature = preprocessing.scale(feature)
         for i in range(parameters[key][0]):
             for j in range(parameters[key][1]):
                 f.write(str(feature[i,j])+",")
@@ -24,61 +34,54 @@ def dataCollection():
     features = dict()
     labels = dict()
     parameters = dict()  # sample number, dimension, k
-    k=3
     #wine. paper use 9 dimensions, while there are 13 dimensions.
     dataset = pd.read_csv("data/wine.data", header=None)
     features["wine"] = dataset.loc[:,1:13]
     labels["wine"] = dataset.loc[:,0]
-    parameters["wine"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    np.unique(labels["wine"])
+    parameters["wine"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["wine"]))]
 
     #pendigit: paper use training data.
-    k=10
     dataset = pd.read_csv("data/pendigits.tra", header=None, sep=",")
     features["pendigits"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["pendigits"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["pendigits"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["pendigits"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["pendigits"]))]
 
     #Ecoli
-    k=5
     dataset = pd.read_csv("data/ecoli.data", header=None,delim_whitespace=True)
     features["ecoli"] = dataset.loc[:,1:dataset.shape[1]-2]
     labels["ecoli"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["ecoli"] = [dataset.shape[0],dataset.shape[1]-2,k]
+    parameters["ecoli"] = [dataset.shape[0],dataset.shape[1]-2,len(np.unique(labels["ecoli"]))]
 
     #Seeds
-    k=3
     dataset = pd.read_csv("data/seeds_dataset.txt", header=None,delim_whitespace=True)
     features["seeds"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["seeds"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["seeds"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["seeds"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["seeds"]))]
 
     #Soybean
-    k=4
     dataset = pd.read_csv("data/soybean-small.data", header=None)
     features["soybean"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["soybean"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["soybean"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["soybean"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["soybean"]))]
 
     #Symbol
-    k=6
     dataset = pd.read_csv("data/Symbols_TEST.arff", header=None)
     features["symbol"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["symbol"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["symbol"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["symbol"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["symbol"]))]
 
     #OliveOil
-    k=4
     dataset = pd.read_csv("data/OliveOil.arff", header=None)
     features["oliveoil"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["oliveoil"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["oliveoil"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["oliveoil"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["oliveoil"]))]
 
     #Plane
-    k=7
     dataset = pd.read_csv("data/Plane.arff", header=None)
     features["plane"] = dataset.loc[:,:dataset.shape[1]-2]
     labels["plane"] = dataset.loc[:,dataset.shape[1]-1]
-    parameters["plane"] = [dataset.shape[0],dataset.shape[1]-1,k]
+    parameters["plane"] = [dataset.shape[0],dataset.shape[1]-1,len(np.unique(labels["plane"]))]
 
     return features, labels, parameters
 
@@ -95,6 +98,7 @@ def algorithmEval(method, feature, label, k, iter=40):
 if __name__ =="__main__":
     features, labels, parameters = dataCollection()
     dataOutput(features,labels,parameters)
+    dataMatOutput(features,labels,parameters)
     for dataset_name in features.keys():
         print("DATASET: %s K: %d SAMPLE NUMBER: %d DIMENSION: %d"%(dataset_name, parameters[dataset_name][2],
                                                                    parameters[dataset_name][0],
