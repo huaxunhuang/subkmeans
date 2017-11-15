@@ -8,8 +8,16 @@ import importlib
 delta = 1e-6
 
 methods = ["LDA_kmeans","kmeans","PCA_kmeans","ICA_kmeans"]
-
-
+def dataOutput(features, labels, parameters):
+    for key in features.keys():
+        f = open("data/standard/"+key,"w")
+        print(key)
+        feature, label = features[key].as_matrix(), labels[key].as_matrix()
+        for i in range(parameters[key][0]):
+            for j in range(parameters[key][1]):
+                f.write(str(feature[i,j])+",")
+            f.write("C"+str(label[i])+"\n")
+        f.close()
 
 def dataCollection():
     #data collection
@@ -86,6 +94,7 @@ def algorithmEval(method, feature, label, k, iter=40):
 
 if __name__ =="__main__":
     features, labels, parameters = dataCollection()
+    dataOutput(features,labels,parameters)
     for dataset_name in features.keys():
         print("DATASET: %s K: %d SAMPLE NUMBER: %d DIMENSION: %d"%(dataset_name, parameters[dataset_name][2],
                                                                    parameters[dataset_name][0],
